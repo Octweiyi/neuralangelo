@@ -29,6 +29,7 @@ trainer:
         render: 1.0
         eikonal: 0.1
         curvature: 5e-4
+        mask: 0.2
     init:
         type: none
     amp_config:

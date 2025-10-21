@@ -43,6 +43,7 @@ class Dataset(base.Dataset):
         # Preload dataset if possible.
         if cfg_data.preload:
             self.images = self.preload_threading(self.get_image, cfg_data.num_workers)
+            self.masks = self.preload_threading(self.get_mask, cfg_data.num_workers)
             self.cameras = self.preload_threading(self.get_camera, cfg_data.num_workers, data_str="cameras")
 
     def __getitem__(self, idx):
@@ -62,6 +63,10 @@ class Dataset(base.Dataset):
         # Get the images.
         image, image_size_raw = self.images[idx] if self.preload else self.get_image(idx)
         image = self.preprocess_image(image)
+
+        mask, mask_size_raw  = self.masks[idx] if self.preload else self.get_mask(idx)
+        mask = self.preprocess_mask(mask)
+        
         # Get the cameras (intrinsics and pose).
         intr, pose = self.cameras[idx] if self.preload else self.get_camera(idx)
         intr, pose = self.preprocess_camera(intr, pose, image_size_raw)
@@ -69,15 +74,18 @@ class Dataset(base.Dataset):
         if self.split == "train":
             ray_idx = torch.randperm(self.H * self.W)[:self.num_rays]  # [R]
             image_sampled = image.flatten(1, 2)[:, ray_idx].t()  # [R,3]
+            mask_sampled = mask.flatten(1, 2)[:, ray_idx].t()  # [R,3]
             sample.update(
                 ray_idx=ray_idx,
                 image_sampled=image_sampled,
+                mask_sampled=mask_sampled,
                 intr=intr,
                 pose=pose,
             )
         else:  # keep image during inference
             sample.update(
                 image=image,
+                mask=mask,
                 intr=intr,
                 pose=pose,
             )
@@ -91,12 +99,31 @@ class Dataset(base.Dataset):
         image_size_raw = image.size
         return image, image_size_raw
 
+    def get_mask(self, idx):
+        fpath = self.list[idx]["file_path"]
+        fpath = fpath.replace("images", "masks")
+        fpath = fpath.replace("jpg", "png")
+
+        image_fname = f"{self.root}/{fpath}"
+        image = Image.open(image_fname)
+        image.load()
+        image_size_raw = image.size
+        return image, image_size_raw
+
     def preprocess_image(self, image):
         # Resize the image.
-        image = image.resize((self.W, self.H))
+        # image = image.resize((self.W, self.H))
+        image = image.resize((self.W, self.H), Image.Resampling.LANCZOS)
         image = torchvision_F.to_tensor(image)
         rgb = image[:3]
         return rgb
+
+    def preprocess_mask(self, image):
+        # Resize the image.
+        # image = image.resize((self.W, self.H))
+        image = image.resize((self.W, self.H), Image.Resampling.LANCZOS)
+        image = torchvision_F.to_tensor(image)
+        return image
 
     def get_camera(self, idx):
         # Camera intrinsics.

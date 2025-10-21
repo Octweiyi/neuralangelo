@@ -46,6 +46,9 @@ class Trainer(BaseTrainer):
                 self.losses["eikonal"] = eikonal_loss(data["gradients"], outside=data["outside"])
             if "curvature" in self.weights:
                 self.losses["curvature"] = curvature_loss(data["hessians"], outside=data["outside"])
+            if "mask" in self.weights:
+                criterion = torch.nn.BCEWithLogitsLoss()
+                self.losses["mask"] = criterion(data["opacity"], data["mask_sampled"])
         else:
             # Compute loss on the entire image.
             self.losses["render"] = self.criteria["render"](data["rgb_map"], data["image"])
