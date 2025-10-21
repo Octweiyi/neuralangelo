@@ -13,8 +13,8 @@ logging_iter: 9999999999999  # disable the printing logger
 max_iter: 500000
 
 wandb_scalar_iter: 100
-wandb_image_iter: 10000
-validation_iter: 5000
+wandb_image_iter: 1000
+validation_iter: 1000
 speed_benchmark: False
 
 checkpoint:
@@ -122,7 +122,7 @@ optim:
     sched:
         iteration_mode: True
         type: two_steps_with_warmup
-        warm_up_end: 5000
+        warm_up_end: 500
         two_steps: [300000,400000]
         gamma: 10.0
 
