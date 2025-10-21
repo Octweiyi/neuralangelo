@@ -10,8 +10,14 @@
 
 # usage: preprocess.sh <sequence_name> <full_video_path> <downsample_rate> <scene_type>
 
-data_path=datasets/${1}_ds${3}
-bash projects/neuralangelo/scripts/run_ffmpeg.sh ${1} ${2} ${3}
-bash projects/neuralangelo/scripts/run_colmap.sh ${data_path}
-python3 projects/neuralangelo/scripts/convert_data_to_json.py --data_dir ${data_path} --scene_type ${4}
-python3 projects/neuralangelo/scripts/generate_config.py --sequence_name ${1} --data_dir ${data_path} --scene_type ${4}
+data_path=$2
+scene_type=object
+if [ -d "${data_path}/sparse" ]; then
+    echo "sparse folder exists in ${data_path}"
+else
+    mkdir -p "${data_path}/sparse"
+    cp -r "${data_path}/hloc_output/sfm/"* "${data_path}/sparse/"
+fi
+
+python3 projects/neuralangelo/scripts/convert_data_to_json.py --data_dir ${data_path} --scene_type ${scene_type}
+python3 projects/neuralangelo/scripts/generate_config.py --sequence_name ${1} --data_dir ${data_path} --scene_type ${scene_type}
