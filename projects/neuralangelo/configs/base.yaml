@@ -41,7 +41,7 @@ model:
         sdf:
             mlp:
                 num_layers: 1
-                hidden_dim: 256
+                hidden_dim: 64
                 skip: []
                 activ: softplus
                 activ_params:
@@ -52,12 +52,12 @@ model:
                 inside_out: False
             encoding:
                 type: hashgrid
-                levels: 16
+                levels: 14
                 hashgrid:
                     min_logres: 5
                     max_logres: 11
                     dict_size: 22
-                    dim: 8
+                    dim: 4
                     range: [-2,2]
                 coarse2fine:
                     enabled: True
@@ -68,8 +68,8 @@ model:
                 taps: 4
         rgb:
             mlp:
-                num_layers: 4
-                hidden_dim: 256
+                num_layers: 2
+                hidden_dim: 64
                 skip: []
                 activ: relu_
                 activ_params: {}
@@ -82,14 +82,14 @@ model:
             init_val: 3.
             anneal_end: 0.1
     background:
-        enabled: True
+        enabled: True 
         white: False
         mlp:
-            num_layers: 8
-            hidden_dim: 256
+            num_layers: 2
+            hidden_dim: 64
             skip: [4]
             num_layers_rgb: 2
-            hidden_dim_rgb: 128
+            hidden_dim_rgb: 32
             skip_rgb: []
             activ: relu
             activ_params: {}
