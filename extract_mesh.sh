@@ -1,7 +1,9 @@
-CHECKPOINT=logs/assemble_with_base/epoch_08000_iteration_000360000_checkpoint.pt
-OUTPUT_MESH=dataset/res/assemble_10w_iter.ply
-CONFIG=logs/assemble/config.yaml
-RESOLUTION=2048
+obj_name=$1
+root_path=$2
+CHECKPOINT=logs/${obj_name}/epoch_15625_iteration_000500000_checkpoint.pt
+OUTPUT_MESH=${root_path}/${obj_name}.ply
+CONFIG=logs/${obj_name}/config.yaml
+RESOLUTION=256
 BLOCK_RES=256
 GPUS=1  # use >1 for multi-GPU mesh extraction
 torchrun --nproc_per_node=${GPUS} projects/neuralangelo/scripts/extract_mesh.py \
